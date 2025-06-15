@@ -1,0 +1,121 @@
+service: to-do-list-backend
+frameworkVersion: "3"
+
+custom:
+  dotenv:
+    path: .env
+  cognitoIssuerUrl: https://eu-north-1lpg5os4os.auth.eu-north-1.amazoncognito.com
+  cognitoClientId: 5pldnhj00tdp1gqu4jqsk0983r
+  frontendUrl: https://dua9bykxw0d0w.cloudfront.net
+  redirectUriCallback: https://vvlfs6eugb.execute-api.eu-north-1.amazonaws.com/dev/callback
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: eu-north-1
+  environment:
+    TASKS_TABLE: tasks-table
+    COGNITO_ISSUER_URL: https://eu-north-1lpg5os4os.auth.eu-north-1.amazoncognito.com
+    COGNITO_CLIENT_ID: 5pldnhj00tdp1gqu4jqsk0983r
+    FRONTEND_URL: https://dua9bykxw0d0w.cloudfront.net
+    REDIRECT_URI_CALLBACK: https://vvlfs6eugb.execute-api.eu-north-1.amazonaws.com/dev/callback
+
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:GetItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:Query
+          Resource:
+            - arn:aws:dynamodb:eu-north-1:133058749053:table/tasks-table
+
+
+plugins:
+  - serverless-dotenv-plugin
+
+functions:
+  addTask:
+    handler: functions/addTask.handler
+    events:
+      - http:
+          path: /addTask
+          method: post
+          cors: true
+
+  updateTask:
+    handler: functions/updateTask.handler
+    events:
+      - http:
+          path: /updateTask
+          method: put
+          cors: true
+
+  deleteTask:
+    handler: functions/deleteTask.handler
+    events:
+      - http:
+          path: /deleteTask
+          method: post
+          cors: true
+
+  getUserTasks:
+    handler: functions/getUserTasks.handler
+    events:
+      - http:
+          path: /getUserTasks
+          method: get
+          cors: true
+
+  getUserTaskByID:
+    handler: functions/getUserTaskByID.handler
+    events:
+      - http:
+          path: /getUserTaskByID
+          method: get
+          cors: true
+
+  login:
+    handler: functions/login.handler
+    events:
+      - http:
+          path: /login
+          method: get
+          cors: true
+
+  callback:
+    handler: functions/callback.handler
+    events:
+      - http:
+          path: /callback
+          method: get
+          cors: true
+
+  logout:
+    handler: functions/logout.handler
+    events:
+      - http:
+          path: /logout
+          method: get
+          cors: true
+
+resources:
+  Resources:
+    TasksTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: tasks-table
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: taskId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+          - AttributeName: taskId
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST

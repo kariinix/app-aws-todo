@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.env
+package-lock.json
+.npm/
+
+*.log
+
+.serverless/
+.aws-sam/
+
+.DS_Store
+Thumbs.db
+
+.vscode/
+.idea/
